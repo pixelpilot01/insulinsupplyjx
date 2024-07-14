@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>insulin supply</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .calculator-container {
+            max-width: 520px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h4 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: bold;
+        }
+        /* New style for specific labels */
+        label[for="calculationType"],
+        label[for="unitsPerDay"],
+        label[for="days"],
+        label[for="unitsPerDaySupply"],
+        label[for="concentration"] {
+            font-size: 14px; /* Adjust this value as needed */
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px; /* This prevents zoom on iOS */
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-right: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button#reset {
+            background-color: #95a5a6;
+        }
+        button#reset:hover {
+            background-color: #7f8c8d;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            border-left: 5px solid #3498db;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator-container">
+        <h4>insulin supply</h4>
+
+        <div>
+            <label for="calculationType">
+                Calculation Type:
+            </label>
+            <select id="calculationType">
+                <option value="daysToSupply">Days to Supply</option>
+                <option value="supplyToDays">Supply to Days</option>
+            </select>
+        </div>
+
+        <div id="daysToSupplyInputs">
+            <div>
+                <label for="unitsPerDay">
+                    Total Units Per Day:
+                </label>
+                <input id="unitsPerDay" type="number" placeholder="Enter units per day">
+            </div>
+
+            <div>
+                <label for="days">
+                    Number of Days:
+                </label>
+                <input id="days" type="number" placeholder="Enter number of days">
+            </div>
+        </div>
+
+        <div id="supplyToDaysInputs" style="display: none;">
+            <div>
+                <label for="unitsPerDaySupply">
+                    Total Units Per Day:
+                </label>
+                <input id="unitsPerDaySupply" type="number" placeholder="Enter units per day">
+            </div>
+
+            <div>
+                <label for="supplyType">
+                    Supply Type:
+                </label>
+                <select id="supplyType">
+                    <option value="3ml">3ml Pen/Vial</option>
+                    <option value="10ml">10ml Vial</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="supplyCount">
+                    Number of Pens/Vials:
+                </label>
+                <input id="supplyCount" type="number" placeholder="Enter number of pens/vials">
+            </div>
+        </div>
+
+        <div>
+            <label for="concentration">
+                Insulin Concentration:
+            </label>
+            <select id="concentration">
+                <option value="100">100 units/ml</option>
+                <option value="200">200 units/ml</option>
+                <option value="300">300 units/ml</option>
+            </select>
+        </div>
+
+        <div>
+            <button id="calculate">
+                Calculate
+            </button>
+            <button id="reset">
+                Reset
+            </button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function resetForm() {
+            document.getElementById('calculationType').value = 'daysToSupply';
+            document.getElementById('unitsPerDay').value = '';
+            document.getElementById('days').value = '';
+            document.getElementById('unitsPerDaySupply').value = '';
+            document.getElementById('supplyType').value = '3ml';
+            document.getElementById('supplyCount').value = '';
+            document.getElementById('concentration').value = '100';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('daysToSupplyInputs').style.display = 'block';
+            document.getElementById('supplyToDaysInputs').style.display = 'none';
+        }
+
+        document.getElementById('calculationType').addEventListener('change', function () {
+            const unitsPerDayValue = document.getElementById('unitsPerDay').value || document.getElementById('unitsPerDaySupply').value;
+
+            if (this.value === 'daysToSupply') {
+                document.getElementById('daysToSupplyInputs').style.display = 'block';
+                document.getElementById('supplyToDaysInputs').style.display = 'none';
+                document.getElementById('unitsPerDay').value = unitsPerDayValue;
+            } else {
+                document.getElementById('daysToSupplyInputs').style.display = 'none';
+                document.getElementById('supplyToDaysInputs').style.display = 'block';
+                document.getElementById('unitsPerDaySupply').value = unitsPerDayValue;
+            }
+            // Clear the result field when switching calculation types
+            document.getElementById('result').innerHTML = '';
+        });
+
+        document.getElementById('calculate').addEventListener('click', function () {
+            const calculationType = document.getElementById('calculationType').value;
+            const concentration = parseInt(document.getElementById('concentration').value);
+            let result = '';
+
+            if (calculationType === 'daysToSupply') {
+                const unitsPerDay = parseFloat(document.getElementById('unitsPerDay').value);
+                const days = parseInt(document.getElementById('days').value);
+
+                if (!unitsPerDay || !days || unitsPerDay <= 0 || days <= 0) {
+                    result = 'Error: Enter positive values for units per day and number of days.';
+                } else {
+                    const totalUnits = unitsPerDay * days;
+                    const unitsPerMl = concentration;
+                    const mlNeeded = totalUnits / unitsPerMl;
+
+                    const pens3ml = Math.ceil(mlNeeded / 3);
+                    const vials10ml = Math.ceil(mlNeeded / 10);
+
+                    const units3ml = pens3ml * 3 * concentration;
+                    const units10ml = vials10ml * 10 * concentration;
+
+                    result = `${days} days at ${unitsPerDay} units/day (${totalUnits} total units):
+                        <br>- ${pens3ml} x 3ml pens/vials (${units3ml} units supplied)
+                        <br>- ${vials10ml} x 10ml vials (${units10ml} units supplied)`;
+                }
+            } else {
+                const unitsPerDay = parseFloat(document.getElementById('unitsPerDaySupply').value);
+                const supplyType = document.getElementById('supplyType').value;
+                const supplyCount = parseInt(document.getElementById('supplyCount').value);
+
+                if (!unitsPerDay || !supplyCount || unitsPerDay <= 0 || supplyCount <= 0) {
+                    result = 'Error: Enter positive values for units per day and supply count.';
+                } else {
+                    const mlPerSupply = supplyType === '3ml' ? 3 : 10;
+                    const totalMl = mlPerSupply * supplyCount;
+                    const totalUnits = totalMl * concentration;
+                    const days = Math.floor(totalUnits / unitsPerDay);
+
+                    result = `${supplyCount} x ${supplyType} ${supplyType === '3ml' ? 'pen(s)/vial(s)' : 'vial(s)'} at ${concentration} units/ml:
+                        <br>Total units supplied: ${totalUnits}
+                        <br>Day Supply: ${days} days at ${unitsPerDay} units per day`;
+                }
+            }
+
+            document.getElementById('result').innerHTML = result;
+        });
+
+        document.getElementById('reset').addEventListener('click', resetForm);
+    </script>
+</body>
+
+</html>
